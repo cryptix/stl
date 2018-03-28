@@ -5,12 +5,15 @@ package stl
 
 import (
 	"testing"
+
+	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-test/deep"
 )
 
 func TestTransform(t *testing.T) {
 	sOrig := makeTestSolid()
 	s := makeTestSolid()
-	s.Transform(&Mat4Identity)
+	s.Transform(mgl32.Ident4())
 	if !sOrig.sameOrderAlmostEqual(s) {
 		t.Error("Not equal after identity transformation")
 		t.Log("Expected:\n", *sOrig)
@@ -31,8 +34,8 @@ func TestScale(t *testing.T) {
 func TestStretch(t *testing.T) {
 	sOrig := makeTestSolid()
 	s := makeTestSolid()
-	s.Stretch(Vec3{1, 2, 1})
-	s.Stretch(Vec3{1, 0.5, 1})
+	s.Stretch(mgl32.Vec3{1, 2, 1})
+	s.Stretch(mgl32.Vec3{1, 0.5, 1})
 	if !sOrig.sameOrderAlmostEqual(s) {
 		t.Error("Not equal after successive Y scaling * 2 * 0.5")
 	}
@@ -57,8 +60,8 @@ func makeBrokenTestSolid() *Solid {
 		Triangles: []Triangle{
 			// This triangle is the black sheep
 			{
-				Normal: Vec3{0, 0, -1},
-				Vertices: [3]Vec3{
+				Normal: mgl32.Vec3{0, 0, -1},
+				Vertices: [3]mgl32.Vec3{
 					// The edge V0 -> V1 is in the wrong direction, V0 and V1 are swapped
 					{0, 1, 0},
 					{0, 0, 0},
@@ -68,8 +71,8 @@ func makeBrokenTestSolid() *Solid {
 			},
 			// For this triangle there is no counter-edge for V0 -> V1
 			{
-				Normal: Vec3{0, -1, 0},
-				Vertices: [3]Vec3{
+				Normal: mgl32.Vec3{0, -1, 0},
+				Vertices: [3]mgl32.Vec3{
 					{0, 0, 0},
 					{1, 0, 0},
 					{0, 0, 1},
@@ -77,8 +80,8 @@ func makeBrokenTestSolid() *Solid {
 			},
 			// For this triangle there is no counter-edge for V1 -> V2
 			{
-				Normal: Vec3{0.57735, 0.57735, 0.57735},
-				Vertices: [3]Vec3{
+				Normal: mgl32.Vec3{0.57735, 0.57735, 0.57735},
+				Vertices: [3]mgl32.Vec3{
 					{0, 0, 1},
 					{1, 0, 0},
 					{0, 1, 0},
@@ -86,8 +89,8 @@ func makeBrokenTestSolid() *Solid {
 			},
 			// The edge V2 -> V0 has a duplicate in triangle 0
 			{
-				Normal: Vec3{-1, 0, 0},
-				Vertices: [3]Vec3{
+				Normal: mgl32.Vec3{-1, 0, 0},
+				Vertices: [3]mgl32.Vec3{
 					{0, 0, 0},
 					{0, 0, 1},
 					{0, 1, 0},
@@ -121,7 +124,7 @@ func TestValidate(t *testing.T) {
 func TestMeasure(t *testing.T) {
 	testSolid := makeTestSolid()
 	measure := testSolid.Measure()
-	if measure.Len != (Vec3{1, 1, 1}) {
+	if !measure.Len.ApproxEqual(mgl32.Vec3{1, 1, 1}) {
 		t.Errorf("Expected Len: [1 1 1], found: %v", measure.Len)
 	}
 }
@@ -129,23 +132,21 @@ func TestMeasure(t *testing.T) {
 func TestRotate(t *testing.T) {
 	sOrig := makeTestSolid()
 	s := makeTestSolid()
-	s.Rotate(Vec3{0, 0, 0}, Vec3{0, 0, 1}, 0)
+	s.Rotate(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 0, 1}, 0)
 	if !sOrig.sameOrderAlmostEqual(s) {
 		t.Error("Not equal after rotation around z-axis with 0 angle")
-		t.Log("Expected:\n", sOrig)
-		t.Log("Found:\n", s)
+		t.Error(deep.Equal(sOrig, s))
 	}
 
-	s.Rotate(Vec3{0, 0, 0}, Vec3{0, 0, 1}, HalfPi)
-	s.Rotate(Vec3{0, 0, 0}, Vec3{0, 0, 1}, -HalfPi)
+	s.Rotate(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 0, 1}, HalfPi)
+	s.Rotate(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 0, 1}, -HalfPi)
 	if !sOrig.sameOrderAlmostEqual(s) {
 		t.Error("Not equal after two rotations around z-axis cancelling each other out")
-		t.Log("Expected:\n", sOrig)
-		t.Log("Found:\n", s)
+		t.Error(deep.Equal(sOrig, s))
 	}
 
-	s.Rotate(Vec3{0, 0, 0}, Vec3{1, 1, 1}, HalfPi)
-	s.Rotate(Vec3{0, 0, 0}, Vec3{1, 1, 1}, -HalfPi)
+	s.Rotate(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{1, 1, 1}, HalfPi)
+	s.Rotate(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{1, 1, 1}, -HalfPi)
 	if !sOrig.sameOrderAlmostEqual(s) {
 		t.Error("Not equal after two rotations cancelling each other out")
 		t.Log("Expected:\n", sOrig)
@@ -159,10 +160,12 @@ func BenchmarkTransform(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	var rotationMatrix Mat4
-	RotationMatrix(Vec3{30, 10, 10}, Vec3{1, 1, 1}, HalfPi/4, &rotationMatrix)
+	//pos := mgl32.Vec3{30, 10, 10}
+	axis := mgl32.Vec3{1, 1, 1}
+	angle := float32(HalfPi / 4)
+	rotationMatrix := mgl32.HomogRotate3D(angle, axis)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		solid.Transform(&rotationMatrix)
+		solid.Transform(rotationMatrix)
 	}
 }

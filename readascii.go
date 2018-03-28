@@ -11,6 +11,8 @@ import (
 	"io"
 	"regexp"
 	"strconv"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func readAllASCII(r io.Reader) (solid *Solid, err error) {
@@ -165,7 +167,7 @@ func (p *parser) parseFacet(t *Triangle) bool {
 		p.consumeToken(idEndfacet)
 }
 
-func (p *parser) parsePoint(pt *Vec3) bool {
+func (p *parser) parsePoint(pt *mgl32.Vec3) bool {
 	return p.parseFloat32(&(pt[0])) &&
 		p.parseFloat32(&(pt[1])) &&
 		p.parseFloat32(&(pt[2]))

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func readAllBinary(r io.Reader, first6 []byte) (solid *Solid, err error) {
@@ -62,7 +64,7 @@ func readTriangleBinary(r io.Reader, t *Triangle) error {
 	return nil
 }
 
-func readBinaryPoint(buf []byte, offset *int, p *Vec3) {
+func readBinaryPoint(buf []byte, offset *int, p *mgl32.Vec3) {
 	p[0] = readBinaryFloat32(buf, offset)
 	p[1] = readBinaryFloat32(buf, offset)
 	p[2] = readBinaryFloat32(buf, offset)

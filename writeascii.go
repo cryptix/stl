@@ -5,6 +5,8 @@ package stl
 import (
 	"fmt"
 	"io"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func writeSolidASCII(w io.Writer, solid *Solid) error {
@@ -57,8 +59,8 @@ func writeTriangleASCII(w io.Writer, t *Triangle) error {
 	return nil
 }
 
-func writePointString(w io.Writer, p *Vec3) error {
+func writePointString(w io.Writer, p *mgl32.Vec3) error {
 	// %v is the easiest way I know to write floats as compact as possible
-	_, err := w.Write([]byte(fmt.Sprintf("%v %v %v", p[0], p[1], p[2])))
+	_, err := fmt.Fprintf(w, "%v %v %v", p[0], p[1], p[2])
 	return err
 }

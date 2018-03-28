@@ -6,6 +6,8 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 // Write solid in binary STL into an io.Writer.
@@ -48,7 +50,7 @@ func writeTriangleBinary(w io.Writer, t *Triangle) error {
 	return err
 }
 
-func encodePoint(buf []byte, offset *int, pt *Vec3) {
+func encodePoint(buf []byte, offset *int, pt *mgl32.Vec3) {
 	encodeFloat32(buf, offset, pt[0])
 	encodeFloat32(buf, offset, pt[1])
 	encodeFloat32(buf, offset, pt[2])
