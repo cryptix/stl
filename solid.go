@@ -1,6 +1,6 @@
 package stl
 
-import "github.com/go-gl/mathgl/mgl32"
+import "github.com/go-gl/mathgl/mgl64"
 
 // This file provides the Solid data type that is a memory representation
 // of an STL file
@@ -24,13 +24,13 @@ type Solid struct {
 // SolidMeasure is used to store the result of Solid.Measure()
 type SolidMeasure struct {
 	// Minimum values for axes
-	Min mgl32.Vec3
+	Min mgl64.Vec3
 
 	// Maximum values for axes
-	Max mgl32.Vec3
+	Max mgl64.Vec3
 
 	// Max - Min
-	Len mgl32.Vec3
+	Len mgl64.Vec3
 }
 
 // Measure the dimensions of a solid in its own units
@@ -60,7 +60,7 @@ func (solid *Solid) Measure() SolidMeasure {
 
 // Transform applies a 4x4 transformation matrix to every vertex
 // and recalculates the normal for every triangle
-func (solid *Solid) Transform(transformationMatrix mgl32.Mat4) {
+func (solid *Solid) Transform(transformationMatrix mgl64.Mat4) {
 	l := len(solid.Triangles)
 	for i := 0; i < l; i++ {
 		// Tried go-routines here. Was slower even with large solids.
@@ -74,7 +74,7 @@ func (solid *Solid) Transform(transformationMatrix mgl32.Mat4) {
 // are applied successively to a solid, and the transformation matrix
 // is not calculated beforehand. Before writing this solid to disk then,
 // RecalculateNormals() should be called.
-func (solid *Solid) TransformNR(transformationMatrix mgl32.Mat4) {
+func (solid *Solid) TransformNR(transformationMatrix mgl64.Mat4) {
 	l := len(solid.Triangles)
 	for i := 0; i < l; i++ {
 		// Tried go-routines here. Was slower even with large solids.
@@ -97,19 +97,19 @@ func (solid *Solid) Scale(factor float64) {
 		t := &solid.Triangles[i]
 		for v := 0; v < 3; v++ {
 			for d := 0; d < 3; d++ {
-				t.Vertices[v][d] = float32(factor * float64(t.Vertices[v][d]))
+				t.Vertices[v][d] = factor * t.Vertices[v][d]
 			}
 		}
 	}
 }
 
 // Stretch scales all vertex coordinates by different factors per axis
-func (solid *Solid) Stretch(vec mgl32.Vec3) {
+func (solid *Solid) Stretch(vec mgl64.Vec3) {
 	for i := 0; i < len(solid.Triangles); i++ {
 		t := &solid.Triangles[i]
 		for v := 0; v < 3; v++ {
 			for d := 0; d < 3; d++ {
-				t.Vertices[v][d] = float32(float64(vec[d]) * float64(t.Vertices[v][d]))
+				t.Vertices[v][d] = vec[d] * t.Vertices[v][d]
 			}
 		}
 		t.recalculateNormal()
@@ -119,7 +119,7 @@ func (solid *Solid) Stretch(vec mgl32.Vec3) {
 // ScaleLinearDowntoSizeBox works like this: if the solid does not fit into size box
 // defined by sizeBox, it is scaled down accordingly. It is not scaled up, if it is
 // smaller than sizeBox. All sizes have to be > 0.
-func (solid *Solid) ScaleLinearDowntoSizeBox(sizeBox mgl32.Vec3) {
+func (solid *Solid) ScaleLinearDowntoSizeBox(sizeBox mgl64.Vec3) {
 	if sizeBox[0] <= 0 || sizeBox[1] <= 0 || sizeBox[2] <= 0 {
 		panic("Not all values in sizeBox are > 0!")
 	}
@@ -139,7 +139,7 @@ func (solid *Solid) ScaleLinearDowntoSizeBox(sizeBox mgl32.Vec3) {
 }
 
 // Translate (i.e. move) the solid by vec
-func (solid *Solid) Translate(vec mgl32.Vec3) {
+func (solid *Solid) Translate(vec mgl64.Vec3) {
 	for i := 0; i < len(solid.Triangles); i++ {
 		t := &solid.Triangles[i]
 		for v := 0; v < 3; v++ {
@@ -167,14 +167,14 @@ func (solid *Solid) IsInPositive() bool {
 // makes sense, as the origin is a perfect reference point for rotations.
 func (solid *Solid) MoveToPositive() {
 	measure := solid.Measure()
-	var translationVector mgl32.Vec3
+	var translationVector mgl64.Vec3
 	for dim := 0; dim < 3; dim++ {
 		if measure.Min[dim] < 0 {
 			translationVector[dim] = -measure.Min[dim] // move smallest value to 0
 		}
 	}
 	// only apply vector if non-zero
-	if translationVector.ApproxEqual(mgl32.Vec3{0, 0, 0}) {
+	if translationVector.ApproxEqual(mgl64.Vec3{0, 0, 0}) {
 		solid.Translate(translationVector)
 	}
 }
@@ -183,7 +183,7 @@ func (solid *Solid) MoveToPositive() {
 func (solid *Solid) scaleDim(factor float64, dim int) {
 	for i := 0; i < len(solid.Triangles); i++ {
 		for v := 0; v < 3; v++ {
-			solid.Triangles[i].Vertices[v][dim] = float32(factor * float64(solid.Triangles[i].Vertices[v][dim]))
+			solid.Triangles[i].Vertices[v][dim] = factor * solid.Triangles[i].Vertices[v][dim]
 		}
 	}
 }
@@ -192,12 +192,12 @@ func (solid *Solid) scaleDim(factor float64, dim int) {
 // by a point pos on the axis and a direction vector dir. This
 // example would rotate the solid by 90 degree around the z-axis:
 //    stl.Rotate(stl.Vec3{0,0,0}, stl.Vec3{0,0,1}, stl.HalfPi)
-func (solid *Solid) Rotate(pos, dir mgl32.Vec3, angle float32) {
-	r := mgl32.HomogRotate3D(angle, dir.Normalize())
+func (solid *Solid) Rotate(pos, dir mgl64.Vec3, angle float64) {
+	r := mgl64.HomogRotate3D(angle, dir.Normalize())
 	solid.Transform(r)
 	/* TODO: pos adjust?!
-	mf := mgl32.Ident4()
-	mb := mgl32.Ident4()
+	mf := mgl64.Ident4()
+	mb := mgl64.Ident4()
 	for i := 0; i < 3; i++ {
 		mf.Set(i, 3, pos[i])
 		mb.Set(i, 3, -pos[i])
@@ -270,19 +270,19 @@ func (eer *EdgeError) HasNoCounterEdge() bool {
 // For every edge described by two points this data structure stores
 // the set of indices of triangles containing this edge.
 type edgeLookup struct {
-	edgeToTriangles map[[2]mgl32.Vec3](map[int]bool)
+	edgeToTriangles map[[2]mgl64.Vec3](map[int]bool)
 }
 
 func newEdgeLookup() *edgeLookup {
 	var l edgeLookup
-	l.edgeToTriangles = make(map[[2]mgl32.Vec3](map[int]bool))
+	l.edgeToTriangles = make(map[[2]mgl64.Vec3](map[int]bool))
 	return &l
 }
 
 // Get the indices to Solid.Triangles of triangles containing
 // the edge v -> w, excluding a specific one denoted by i.
-func (l *edgeLookup) OtherTrianglesWithEdge(v, w mgl32.Vec3, i int) []int {
-	triangleSet, found := l.edgeToTriangles[[2]mgl32.Vec3{v, w}]
+func (l *edgeLookup) OtherTrianglesWithEdge(v, w mgl64.Vec3, i int) []int {
+	triangleSet, found := l.edgeToTriangles[[2]mgl64.Vec3{v, w}]
 	if !found {
 		return nil
 	}
@@ -297,8 +297,8 @@ func (l *edgeLookup) OtherTrianglesWithEdge(v, w mgl32.Vec3, i int) []int {
 
 // Put triangleIndex into the set of indices of triangles containing
 // the edge v -> w.
-func (l *edgeLookup) InsertEdge(triangleIndex int, v, w mgl32.Vec3) {
-	key := [2]mgl32.Vec3{v, w}
+func (l *edgeLookup) InsertEdge(triangleIndex int, v, w mgl64.Vec3) {
+	key := [2]mgl64.Vec3{v, w}
 	triangleSet, found := l.edgeToTriangles[key]
 	if !found {
 		l.edgeToTriangles[key] = make(map[int]bool)

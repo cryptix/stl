@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 func readAllASCII(r io.Reader) (solid *Solid, err error) {
@@ -167,13 +167,13 @@ func (p *parser) parseFacet(t *Triangle) bool {
 		p.consumeToken(idEndfacet)
 }
 
-func (p *parser) parsePoint(pt *mgl32.Vec3) bool {
+func (p *parser) parsePoint(pt *mgl64.Vec3) bool {
 	return p.parseFloat32(&(pt[0])) &&
 		p.parseFloat32(&(pt[1])) &&
 		p.parseFloat32(&(pt[2]))
 }
 
-func (p *parser) parseFloat32(f *float32) bool {
+func (p *parser) parseFloat32(f *float64) bool {
 	if p.eof {
 		return false
 	}
@@ -183,7 +183,7 @@ func (p *parser) parseFloat32(f *float32) bool {
 		return false
 	}
 
-	*f = float32(f64)
+	*f = f64
 	p.nextWord()
 	return true
 }

@@ -5,18 +5,18 @@ package stl
 import (
 	"testing"
 
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 func TestVec3Angle(t *testing.T) {
-	v := mgl32.Vec3{1, 0, 0}
+	v := mgl64.Vec3{1, 0, 0}
 	tol := 0.00005
-	testV := []mgl32.Vec3{
-		mgl32.Vec3{0, 1, 0},
-		mgl32.Vec3{0, -1, 0},
-		mgl32.Vec3{-1, 0, 0},
-		mgl32.Vec3{-1, 1, 0},
-		mgl32.Vec3{-1, -1, 0}}
+	testV := []mgl64.Vec3{
+		mgl64.Vec3{0, 1, 0},
+		mgl64.Vec3{0, -1, 0},
+		mgl64.Vec3{-1, 0, 0},
+		mgl64.Vec3{-1, 1, 0},
+		mgl64.Vec3{-1, -1, 0}}
 	expected := []float64{
 		HalfPi,
 		HalfPi,

@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 func makeTestSolid() *Solid {
@@ -17,32 +17,32 @@ func makeTestSolid() *Solid {
 		IsAscii: true,
 		Triangles: []Triangle{
 			{
-				Normal: mgl32.Vec3{0, 0, -1},
-				Vertices: [3]mgl32.Vec3{
+				Normal: mgl64.Vec3{0, 0, -1},
+				Vertices: [3]mgl64.Vec3{
 					{0, 0, 0},
 					{0, 1, 0},
 					{1, 0, 0},
 				},
 			},
 			{
-				Normal: mgl32.Vec3{0, -1, 0},
-				Vertices: [3]mgl32.Vec3{
+				Normal: mgl64.Vec3{0, -1, 0},
+				Vertices: [3]mgl64.Vec3{
 					{0, 0, 0},
 					{1, 0, 0},
 					{0, 0, 1},
 				},
 			},
 			{
-				Normal: mgl32.Vec3{0.57735, 0.57735, 0.57735},
-				Vertices: [3]mgl32.Vec3{
+				Normal: mgl64.Vec3{0.57735, 0.57735, 0.57735},
+				Vertices: [3]mgl64.Vec3{
 					{0, 0, 1},
 					{1, 0, 0},
 					{0, 1, 0},
 				},
 			},
 			{
-				Normal: mgl32.Vec3{-1, 0, 0},
-				Vertices: [3]mgl32.Vec3{
+				Normal: mgl64.Vec3{-1, 0, 0},
+				Vertices: [3]mgl64.Vec3{
 					{0, 0, 0},
 					{0, 0, 1},
 					{0, 1, 0},
@@ -90,7 +90,7 @@ func (s *Solid) sameOrderAlmostEqual(o *Solid) bool {
 	return true
 }
 
-func (t *Triangle) sameOrderAlmostEqual(o *Triangle, tol float32) bool {
+func (t *Triangle) sameOrderAlmostEqual(o *Triangle, tol float64) bool {
 	return t.Normal.ApproxEqualThreshold(o.Normal, tol) &&
 		t.Vertices[0].ApproxEqualThreshold(o.Vertices[0], tol) &&
 		t.Vertices[1].ApproxEqualThreshold(o.Vertices[1], tol) &&

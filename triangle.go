@@ -3,7 +3,7 @@ package stl
 import (
 	"math"
 
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 // This file defines the Triangle data type, the building block for Solid
@@ -15,12 +15,12 @@ import (
 // avoid recalculation.
 type Triangle struct {
 	// Normal vector of triangle, should be normalized...
-	Normal mgl32.Vec3
+	Normal mgl64.Vec3
 
 	// Vertices of triangle in right hand order.
 	// I.e. from the front the triangle's vertices are ordered counterclockwise
 	// and the normal vector is orthogonal to the front pointing outside.
-	Vertices [3]mgl32.Vec3
+	Vertices [3]mgl64.Vec3
 
 	// 16 bits of attributes. Not available in ASCII format. Could be used
 	// for color selection, texture selection, refraction etc. Some tools ignore
@@ -29,7 +29,7 @@ type Triangle struct {
 }
 
 // Calculate the normal vector using the right hand rule
-func (t *Triangle) calculateNormal() mgl32.Vec3 {
+func (t *Triangle) calculateNormal() mgl64.Vec3 {
 	// The normal is calculated by normalizing the result of
 	// (V0-V2) x (V1-V2)
 	return t.Vertices[0].Sub(t.Vertices[2]).
@@ -44,14 +44,14 @@ func (t *Triangle) recalculateNormal() {
 
 // Applies a 4x4 transformation matrix to every vertex
 // and recalculates the normal
-func (t *Triangle) transform(transformationMatrix mgl32.Mat4) {
+func (t *Triangle) transform(transformationMatrix mgl64.Mat4) {
 	t.transformNR(transformationMatrix)
 	t.recalculateNormal()
 }
 
 // Applies a 4x4 transformation matrix to every vertex
 // without recalculating the normal afterwards
-func (t *Triangle) transformNR(transformationMatrix mgl32.Mat4) {
+func (t *Triangle) transformNR(transformationMatrix mgl64.Mat4) {
 	m3 := transformationMatrix.Mat3()
 	for i := 0; i < 3; i++ {
 		t.Vertices[i] = m3.Mul3x1(t.Vertices[i])
@@ -76,7 +76,7 @@ func (t *Triangle) checkNormal(tol float64) bool {
 	return Angle(t.Normal, calculatedNormal) < tol
 }
 
-func Angle(vec, o mgl32.Vec3) float64 {
+func Angle(vec, o mgl64.Vec3) float64 {
 	lenProd := vec.Len() * o.Len()
 	if lenProd == 0 {
 		return 0
