@@ -87,7 +87,7 @@ func (solid *Solid) TransformNR(transformationMatrix mgl64.Mat4) {
 // that does not recalculate the normal vectors.
 func (solid *Solid) RecalculateNormals() {
 	for i := 0; i < len(solid.Triangles); i++ {
-		solid.Triangles[i].recalculateNormal()
+		solid.Triangles[i].RecalculateNormal()
 	}
 }
 
@@ -112,7 +112,7 @@ func (solid *Solid) Stretch(vec mgl64.Vec3) {
 				t.Vertices[v][d] = vec[d] * t.Vertices[v][d]
 			}
 		}
-		t.recalculateNormal()
+		t.RecalculateNormal()
 	}
 }
 
